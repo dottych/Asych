@@ -7,7 +7,7 @@ module.exports = (params, res) => {
     db.addTrack(
         
         trackId,
-        params.n,
+        decodeURIComponent(params.n),
         user.id,
         user.name,
         params.d
