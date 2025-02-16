@@ -1,11 +1,11 @@
 module.exports = (params, res) => {
     const db = require('../Database');
 
-    let user = db.getUserByName(params.dn);
+    let user = db.getUserByName(encodeURIComponent(params.dn));
 
     if (user == undefined) {
         const newId = db.getUserCount()+1;
-        db.addUser(newId, params.dn, params.cs, params.c1, params.c2);
+        db.addUser(newId, encodeURIComponent(params.dn), params.cs, params.c1, params.c2);
         user = db.getUserById(newId);
     }
 
