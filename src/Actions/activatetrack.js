@@ -6,7 +6,7 @@ module.exports = (params, res) => {
     const newMoney = user.money - +params.v; // unsafe, game...
     db.updateMoney(user.id, newMoney);
 
-    db.activateTrack(user.lastTrackId);
+    db.activateTrack(params.t == "0" ? user.lastTrackId : params.t);
     db.updateActivity(params.u);
 
     res.end(require('../Utils').response({
