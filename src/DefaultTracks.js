@@ -1,7 +1,7 @@
 module.exports = () => {
     const db = require('./Database');
 
-    db.addTrack(
+    db.addActivatedTrack(
 
         1, "Akeley Circuit",
         0, "Ben Olding",
@@ -23,7 +23,7 @@ module.exports = () => {
     
     );
     
-    db.addTrack(
+    db.addActivatedTrack(
     
         2, "Whaddon Jump Track",
         0, "Ben Olding",
@@ -45,7 +45,7 @@ module.exports = () => {
     
     );
     
-    db.addTrack(
+    db.addActivatedTrack(
     
         3, "Oving Oval",
         0, "alexiastra",
@@ -67,7 +67,7 @@ module.exports = () => {
     
     );
     
-    db.addTrack(
+    db.addActivatedTrack(
     
         4, "Tingewick Raceway",
         0, "Ben Olding",
@@ -89,7 +89,7 @@ module.exports = () => {
     
     );
 
-    db.addTrack(
+    db.addActivatedTrack(
     
         5, "Inverted Circle",
         0, "alexiastra",
@@ -111,7 +111,7 @@ module.exports = () => {
     
     );
 
-    db.addTrack(
+    db.addActivatedTrack(
     
         6, "Buckingham Speedway",
         0, "alexiastra",
@@ -133,7 +133,7 @@ module.exports = () => {
     
     );
 
-    db.addTrack(
+    db.addActivatedTrack(
     
         7, "Milton Keynes Grid System",
         0, "alexiastra",

@@ -1,8 +1,8 @@
 class Database {
     constructor() {
-        this.db = new require('better-sqlite3')("./database.db");
+        this.db = new (require('bun:sqlite')).Database("./database.db");
 
-        this.db.pragma('journal_mode = WAL');
+        this.db.exec("PRAGMA journal_mode = WAL;");
 
         this.db.exec(`
             create table if not exists users (
@@ -26,6 +26,7 @@ class Database {
                 trackName text,
                 userId integer,
                 userName text,
+                activated integer,
                 trackUnix integer,
                 data text
             );
@@ -51,8 +52,13 @@ class Database {
     getUserByName(name) { return this.db.prepare(`select * from users where name = ?;`).get(name); }
 
     getTrackById(id) { return this.db.prepare(`select * from tracks where trackId = ?;`).get(id); }
+    getTracks() { return this.db.prepare(`select * from tracks;`).all(); }
+    getActivatedTracks() { return this.db.prepare(`select * from tracks where activated = 1;`).all(); }
+    getTracksByUserId(id) { return this.db.prepare(`select * from tracks where userId = ?;`).all(id); }
+    getActivatedTracksByUserId(id) { return this.db.prepare(`select * from tracks where userId = ? and activated = 1;`).all(id); }
+    getNonActivatedTracksByUserId(id) { return this.db.prepare(`select * from tracks where userId = ? and activated = 0;`).all(id); }
 
-    getRecordsByTrackId(id) { return this.db.prepare(`select * from records where trackId = ?;`).all(id); }
+    getRecordsByTrackId(id) { return this.db.prepare(`select * from records where trackId = ? and timer > -1 order by timer asc limit 9;`).all(id); }
     
     addUser(id, name, carStyle, carColour1, carColour2) {
         this.db.prepare(`
@@ -104,9 +110,11 @@ class Database {
                 trackName,
                 userId,
                 userName,
+                activated,
                 trackUnix,
                 data
             ) values (
+                ?,
                 ?,
                 ?,
                 ?,
@@ -117,9 +125,15 @@ class Database {
         `).run(
             trackId, trackName,
             userId, userName,
+            0,
             Date.now(),
             data
         );
+    }
+
+    addActivatedTrack(trackId, trackName, userId, userName, data) {
+        this.addTrack(trackId, trackName, userId, userName, data);
+        this.activateTrack(trackId);
     }
 
     addRecord(trackId, userId, timer, hornTimer, chat, chatTimer, path, pathCheck) {
@@ -198,6 +212,14 @@ class Database {
             update users set lastTrackId = ? where id = ?;
         `).run(
             trackId, userId
+        );
+    }
+
+    activateTrack(trackId) {
+        this.db.prepare(`
+            update tracks set activated = 1 where trackId = ?;
+        `).run(
+            trackId
         );
     }
 }

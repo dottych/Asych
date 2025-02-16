@@ -1,14 +1,33 @@
 module.exports = (params, res) => {
+    try {
     const db = require('../Database');
 
     let trackId = params.tid;
 
+    const trackCount = db.getTrackCount();
+
     if (trackId == "undefined") {
-        const trackCount = db.getTrackCount();
         trackId = Math.floor(Math.random() * trackCount) + 1;
     }
+
+    if (trackId == "0")
+        trackId = db.getUserById(params.u).lastTrackId;
     
-    const track = db.getTrackById(trackId);
+    let track = db.getTrackById(trackId);
+
+    while (track.activated == 0) {
+        // gm 2 is edit mode
+        if (params.gm == "2" && track.userId == params.u)
+            break;
+
+        if (params.tid != "undefined") {
+            res.end(require('../Utils').response({ error: "Tried to get an unactivated track in race mode - not yours." }));
+            return;
+        }
+
+        trackId = Math.floor(Math.random() * trackCount) + 1;
+        track = db.getTrackById(trackId);
+    }
 
     let response = {
                 
@@ -30,7 +49,7 @@ module.exports = (params, res) => {
         YourFunRating: 0,
         YourDifficultyRating: 0,
 
-        Activated: 1,
+        Activated: track.activated,
 
         // awards: 1,
         // A_T: 1,
@@ -77,4 +96,5 @@ module.exports = (params, res) => {
     db.updateLastTrack(params.u, track.trackId);
     db.updateActivity(params.u);
     res.end(require('../Utils').response(response));
+} catch (e) {console.log(e)}
 }

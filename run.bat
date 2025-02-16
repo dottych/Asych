@@ -2,6 +2,6 @@
 
 :run
 cls
-node ./src/Server.js
+bun run ./src/Server.js
 pause
 goto run
