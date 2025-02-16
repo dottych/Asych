@@ -128,3 +128,15 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# do not include misc swf files and actionscript files
+nonstatic/
+*.as
+
+# no databases either
+*.db
+*.db-shm
+*.db-wal
+
+# misc
+src/.PLEASE_DELETE_HTML_LATER
