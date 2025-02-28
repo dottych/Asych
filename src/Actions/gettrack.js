@@ -1,5 +1,4 @@
 module.exports = (params, res) => {
-    try {
     const db = require('../Database');
 
     let trackId = params.tid;
@@ -51,6 +50,9 @@ module.exports = (params, res) => {
 
         Activated: track.activated,
 
+        // preview
+        p: params.p == "1" ? "True" : "False",
+
         // awards: 1,
         // A_T: 1,
         // A_UN0: "Best Racer",
@@ -60,7 +62,7 @@ module.exports = (params, res) => {
 
     }
 
-    const records = db.getRecordsByTrackId(track.trackId);
+    const records = db.getRandomRecordsByTrackId(track.trackId);
 
     if (records.length > 0) response.found = records.length;
 
@@ -96,5 +98,4 @@ module.exports = (params, res) => {
     db.updateLastTrack(params.u, track.trackId);
     db.updateActivity(params.u);
     res.end(require('../Utils').response(response));
-} catch (e) {console.log(e)}
 }

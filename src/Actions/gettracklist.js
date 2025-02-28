@@ -1,5 +1,4 @@
 module.exports = (params, res) => {
-    try {
     const db = require('../Database');
 
     let response = {
@@ -35,6 +34,11 @@ module.exports = (params, res) => {
                 tracks = db.getActivatedTracks();
                 break;
             
+        } else if (params.c != undefined) {
+            tracks = [];
+
+            for (let i = 1; i <= 10; i++)
+                tracks.push(db.getTrackById(i));
         }
     }
 
@@ -49,5 +53,4 @@ module.exports = (params, res) => {
     }
 
     res.end(require('../Utils').response(response));
-} catch (e) { console.log(e)}
 }

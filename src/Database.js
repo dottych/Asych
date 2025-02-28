@@ -58,7 +58,14 @@ class Database {
     getActivatedTracksByUserId(id) { return this.db.prepare(`select * from tracks where userId = ? and activated = 1;`).all(id); }
     getNonActivatedTracksByUserId(id) { return this.db.prepare(`select * from tracks where userId = ? and activated = 0;`).all(id); }
 
-    getRecordsByTrackId(id) { return this.db.prepare(`select * from records where trackId = ? and timer > -1 order by timer asc limit 9;`).all(id); }
+    getRecordsByTrackId(id) { return this.db.prepare(`select * from records where trackId = ?`).all(id); }
+    getRandomRecordsByTrackId(id) {
+        return this.db.prepare(`
+            with top_half as (
+                select * from records where trackId = ? order by timer asc limit (select count(trackId)/2 from records)
+            ) select * from top_half order by random() limit 9;
+        `).all(id); 
+    }
     
     addUser(id, name, carStyle, carColour1, carColour2) {
         this.db.prepare(`

@@ -44,6 +44,8 @@ class Utils {
             params[splitParam[0]] = splitParam[1];
         }
 
+        delete params[""];
+
         return params;
     }
 
