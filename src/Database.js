@@ -66,6 +66,27 @@ class Database {
             ) select * from top_half order by random() limit 9;
         `).all(id); 
     }
+    getTopRecordsByTrackId(id) {
+        return [
+            // all-time
+            this.db.prepare(`select * from records where trackId = ? and timer > 0 order by timer asc limit 1;`).get(id),
+
+            // monthly
+            this.db.prepare(
+                `select * from records where trackId = ? and timer > 0 and recordUnix > ? order by timer asc limit 1;`
+            ).get(id, Date.now()-(1000*60*60*24*7*4)),
+
+            // weekly
+            this.db.prepare(
+                `select * from records where trackId = ? and timer > 0 and recordUnix > ? order by timer asc limit 1;`
+            ).get(id, Date.now()-(1000*60*60*24*7)),
+
+            // daily
+            this.db.prepare(
+                `select * from records where trackId = ? and timer > 0 and recordUnix > ? order by timer asc limit 1;`
+            ).get(id, Date.now()-(1000*60*60*24))
+        ]
+    }
     
     addUser(id, name, carStyle, carColour1, carColour2) {
         this.db.prepare(`

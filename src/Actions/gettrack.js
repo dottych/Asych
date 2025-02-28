@@ -53,16 +53,28 @@ module.exports = (params, res) => {
         // preview
         p: params.p == "1" ? "True" : "False",
 
-        // awards: 1,
-        // A_T: 1,
-        // A_UN0: "Best Racer",
-        // A_RT0: 100,
-
+        awards: 0,
         found: 0 // how many replays
 
     }
 
     const records = db.getRandomRecordsByTrackId(track.trackId);
+    const awards = db.getTopRecordsByTrackId(track.trackId);
+
+    let awardIndex = 0;
+    let awardTypeIndex = 0;
+    for (let award of awards) {
+        awardTypeIndex++;
+
+        if (award == undefined) continue;
+
+        response["A_T"+awardIndex] = awardTypeIndex;
+        response["A_UN"+awardIndex] = encodeURIComponent(db.getUserById(award.userId).name);
+        response["A_RT"+awardIndex] = award.timer;
+
+        response.awards++;
+        awardIndex++;
+    }
 
     if (records.length > 0) response.found = records.length;
 
