@@ -11,12 +11,15 @@ module.exports = (params, res) => {
 
     const chat = params.c == "" || params.c == undefined ? ["", ""] : params.c.split('<');
 
+    const raceID = params.gm == "3" && params.rid != undefined ? params.rid : 0;
+
     // uses last track ID from database, because game doesn't carry its current track ID...???
     db.addRecord(
         
         user.lastTrackId, params.uid,
         params.t, params.h,
         chat[0], chat[1].replace('>', ""),
+        raceID,
         params.p, params.rpc
         
     );

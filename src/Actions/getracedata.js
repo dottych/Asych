@@ -1,0 +1,85 @@
+module.exports = (params, res) => {
+    const db = require('../Database');
+    
+    let track = db.getTrackById(db.getRaceById(params.rid).trackId);
+
+    let response = {
+                
+        return: "trackdata",
+        trackfound: "true",
+
+        TrackData: track.data,
+
+        TrackId: track.trackId,
+        TrackName: encodeURIComponent(track.trackName),
+
+        CreatedBy: track.userId,
+        UserName: encodeURIComponent(track.userName),
+
+        FunRating: 0, // stars
+        Ratings: 0, // fun vote count
+        DifficultyRating: 0,
+        DiffAmount: 0, // diff vote count
+        YourFunRating: 0,
+        YourDifficultyRating: 0,
+
+        Activated: track.activated,
+
+        awards: 0,
+        found: 0 // how many replays
+
+    }
+
+    const records = db.getRaceRecordsByTrackId(params.rid, track.trackId);
+    const awards = db.getTopRecordsByTrackId(track.trackId);
+
+    let awardIndex = 0;
+    let awardTypeIndex = 0;
+    for (let award of awards) {
+        awardTypeIndex++;
+
+        if (award == undefined) continue;
+
+        response["A_T"+awardIndex] = awardTypeIndex;
+        response["A_UN"+awardIndex] = encodeURIComponent(db.getUserById(award.userId).name);
+        response["A_RT"+awardIndex] = award.timer;
+
+        response.awards++;
+        awardIndex++;
+    }
+
+    if (records.length > 0) response.found = records.length;
+
+    let recordIndex = 0;
+    for (let record of records) {
+        const recordUser = db.getUserById(record.userId);
+
+        response[`UN${recordIndex}`] = recordUser.name;
+        response[`P${recordIndex}`] = record.path;
+        response[`C${recordIndex}`] = recordUser.carType;
+        response[`C1${recordIndex}`] = recordUser.carColour1;
+        response[`C2${recordIndex}`] = recordUser.carColour2;
+        response[`RT${recordIndex}`] = record.timer;
+        response[`UID${recordIndex}`] = record.userId;
+        response[`H${recordIndex}`] = record.hornTimer;
+        response[`CS${recordIndex}`] = recordUser.carStyle;
+
+        if (record.chat != "")
+            response[`Ch${recordIndex}`] = `${record.chat}<>${record.chatTimer}<>`;
+        else
+            response[`Ch${recordIndex}`] = "";
+
+        response[`HS${recordIndex}`] = recordUser.hornType;
+
+        if (record.pathCheck != undefined)
+            response[`PC${recordIndex}`] = record.pathCheck;
+        else
+            response[`PC${recordIndex}`] = "";
+
+        recordIndex++;
+    }
+
+    db.updateLastTrack(params.u, track.trackId);
+    db.updateActivity(params.u);
+    res.end(require('../Utils').response(response));
+}

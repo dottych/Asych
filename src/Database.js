@@ -39,14 +39,24 @@ class Database {
                 chat text,
                 chatTimer integer,
                 recordUnix integer,
+                raceId integer,
                 path text,
                 pathCheck text
+            );
+
+            create table if not exists races (
+                raceId integer primary key,
+                raceName text,
+                unixEnd integer,
+                trackId integer,
+                userId integer
             );
         `);
     }
 
     getUserCount() { return this.db.prepare(`select count(id) from users`).get()['count(id)']; }
     getTrackCount() { return this.db.prepare(`select count(trackId) from tracks`).get()['count(trackId)']; }
+    getRaceCount() { return this.db.prepare(`select count(raceId) from races`).get()['count(raceId)']; }
 
     getUserById(id) { return this.db.prepare(`select * from users where id = ?;`).get(id); }
     getUserByName(name) { return this.db.prepare(`select * from users where name = ?;`).get(name); }
@@ -87,6 +97,12 @@ class Database {
             ).get(id, Date.now()-(1000*60*60*24))
         ]
     }
+    getRaceRecordsByTrackId(raceId, trackId) {
+        return this.db.prepare(`select * from records where raceId = ? and trackId = ? order by timer asc;`).all(raceId, trackId);
+    }
+
+    getRaceById(id) { return this.db.prepare(`select * from races where raceId = ?;`).get(id) }
+    getRaces() { return this.db.prepare(`select * from races;`).all(); }
     
     addUser(id, name, carStyle, carColour1, carColour2) {
         this.db.prepare(`
@@ -164,7 +180,7 @@ class Database {
         this.activateTrack(trackId);
     }
 
-    addRecord(trackId, userId, timer, hornTimer, chat, chatTimer, path, pathCheck) {
+    addRecord(trackId, userId, timer, hornTimer, chat, chatTimer, raceId, path, pathCheck) {
         this.db.prepare(`
             insert into records (
                 trackId,
@@ -174,9 +190,11 @@ class Database {
                 chat,
                 chatTimer,
                 recordUnix,
+                raceId,
                 path,
                 pathCheck
             ) values (
+                ?,
                 ?,
                 ?,
                 ?,
@@ -192,6 +210,7 @@ class Database {
             timer, hornTimer,
             chat, chatTimer,
             Date.now(),
+            raceId,
             path, pathCheck
         );
     }
@@ -248,6 +267,29 @@ class Database {
             update tracks set activated = 1 where trackId = ?;
         `).run(
             trackId
+        );
+    }
+
+    createRace(raceId, raceName, trackId, userId, unixEnd) {
+        this.db.prepare(`
+            insert into races (
+                raceId,
+                raceName,
+                unixEnd,
+                trackId,
+                userId
+            ) values (
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+            );
+        `).run(
+            raceId, raceName,
+            unixEnd,
+            trackId,
+            userId
         );
     }
 }
